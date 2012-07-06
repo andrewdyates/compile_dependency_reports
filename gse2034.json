@@ -1,0 +1,11 @@
+{
+    "gse_id": "GSE2034",
+    "data_file": path,
+    "dependencies": {
+	// dict of pairwise dependency matrices
+	"mic": {"values": path, "argsorted": path, "bool": path, "varlist": null},
+	"pcc": {"values": path, "argsorted": path, "bool": path, "varlist": null},
+    },
+}
+ 
+      
