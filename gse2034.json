@@ -3,8 +3,8 @@
     "data_file": path,
     "dependencies": {
 	// dict of pairwise dependency matrices
-	"mic": {"values": path, "argsorted": path, "bool": path, "varlist": null},
-	"pcc": {"values": path, "argsorted": path, "bool": path, "varlist": null},
+	"mic": {"values_file": path, "argsorted_file": path, "bool_file": path},
+	"pcc": {"values_file": path, "argsorted_file": path, "bool_file": path},
     },
 }
  
