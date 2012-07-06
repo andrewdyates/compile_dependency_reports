@@ -1,11 +1,18 @@
 {
     "gse_id": "GSE2034",
-    "data_file": path,
+    "data_file": "/nfs/01/osu6683/gse2034/GSE2034.GPL96.eQTL.normed.tab",
     "dependencies": {
-	// dict of pairwise dependency matrices
-	"mic": {"values_file": path, "argsorted_file": path, "bool_file": path},
-	"pcc": {"values_file": path, "argsorted_file": path, "bool_file": path},
-    },
+	"mic": {
+	       "dir": "/nfs/01/osu6683/gse2034/",
+	       "values_file": "GSE2034.GPL96.eQTL.normed.tab.varlist.txt.MIC.npy",
+	       "argsorted_file": "GSE2034.GPL96.eQTL.normed.tab.varlist.txt.MIC.npy.argsorted.npy",
+	       "bool_file": "GSE2034.GPL96.eQTL.normed.tab.varlist.txt.MINE.isset.npy"},
+	"pcc": {
+	       "dir": "/nfs/01/osu6683/gse2034/",
+	       "values_file": "GSE2034.GPL96.eQTL.normed.tab.varlist.txt.P.npy",
+	       "argsorted_file": "GSE2034.GPL96.eQTL.normed.tab.varlist.txt.P.npy.argsorted.npy",
+	       "bool_file": "GSE2034.GPL96.eQTL.normed.tab.varlist.txt.MINE.isset.npy"}
+    }
 }
  
       

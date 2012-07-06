@@ -14,7 +14,7 @@ TOP_ENRICHMENTS = [1000, 10000, 100000, 500000]
 
 
 def main(json_input=None, outdir=None, pina_file=None):
-  assert (json_input and outdir)
+  assert (json_input and outdir is not None)
 
   try:
     os.makedirs(outdir)
@@ -29,20 +29,22 @@ def main(json_input=None, outdir=None, pina_file=None):
   enriched = {'None': None}
   if pina_file:
     enriched['PINA'] = PINAEnriched(open(pina_file))
+    print "Loaded %d pairs from %d variables from %s." % \
+        (len(enriched['PINA'].pairs), len(enriched['PINA'].genes), pina_file)
 
 
   varlist = []
   Q = np.genfromtxt(name_iter(open(D['data_file']), varlist), usemask=True, delimiter='\t')
-  print "Loaded %d variables of %d entries." % (np.size(Q,0), np.size(Q,1))
+  print "Loaded %d variables of %d entries from %s." % (np.size(Q,0), np.size(Q,1), D['data_file'])
   print
 
   # For each dependency:
   for name, d in D['dependencies'].items():
     print "Loading %s..." % name
     print "values: ", d
-    M = np.load(d['values_file'])
-    B = np.load(d['bool_file'])
-    A = np.load(d['argsorted_file'])
+    M = np.load(os.path.join(d['dir'], d['values_file']))
+    B = np.load(os.path.join(d['dir'], d['bool_file']))
+    A = np.load(os.path.join(d['dir'], d['argsorted_file']))
     # report missing values, get size
     n = np.size(M,0)
     try:
@@ -53,7 +55,7 @@ def main(json_input=None, outdir=None, pina_file=None):
       continue
     n_missing = np.size(np.where(B == 0))
     # create masked array 
-    Q = ma.array(data=M, mask=B)
+    Q = ma.array(data=M, mask=~B)
     # save results in results dict R
     R[name] = {
       'n': n,
@@ -73,13 +75,12 @@ def main(json_input=None, outdir=None, pina_file=None):
     if E is not None:
       continue
     
-    for name, d in R:
+    for name, d in R.items():
       print name
       stats = {
         'mean': d['Q'].mean(),
         'std': d['Q'].std(),
-        'mode': d['Q'].mode(),
-        'median': d['Q'].median(),
+        'median': ma.median(d['Q']),
         }
       print stats
       d.update(stats)
@@ -107,4 +108,4 @@ def main(json_input=None, outdir=None, pina_file=None):
       # scatterplot
 
 if __name__ == "__main__":
-  main(dict(**[s.split('=') for s in sys.argv[1]]))
+  main(**dict([s.split('=') for s in sys.argv[1:]]))

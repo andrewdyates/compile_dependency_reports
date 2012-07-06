@@ -47,8 +47,8 @@ class PINAEnriched(Enriched):
       m_a, m_b = self.RX_GENE_NAME.match(s_a), self.RX_GENE_NAME.match(s_b)
       if not (m_b and m_b):
         continue
-      yield (m_a, m_b)
+      yield (m_a.group(1), m_b.group(1))
       
   def __init__(self, fp):
     """Initialize from new open fp to PINA formatted file."""
-    super(Enriched, self).__init__(self._pair_gen(fp))
+    super(PINAEnriched, self).__init__(pairs=self._pair_gen(fp))
