@@ -1,4 +1,5 @@
 from util import *
+from py_symmetric_matrix import *
 
 class Enriched(object):
 
@@ -32,6 +33,19 @@ class Enriched(object):
     if not (x in self.genes and y in self.genes):
       return False
     return self._hash(x,y) in self.pairs_hash
+
+  def indices(self, varlist):
+    """Return a list of indices for sym dependency matrix using varlist.
+    """
+    n = len(varlist)
+    a = []
+    cleaned_varlist = [clean(v) for v in varlist]
+    var_d = dict([(v, i) for i, v in cleaned_varlist])
+    for x, y in pairs:
+        i, j = var_d[x], var_d[y]
+        idx = sym_idx(i,j,n)
+        a.append(idx)
+    return a
 
 
 class PINAEnriched(Enriched):

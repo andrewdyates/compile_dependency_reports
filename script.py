@@ -74,6 +74,11 @@ def main(json_input=None, outdir=None, pina_file=None):
     # skip enrichment for now
     if E is not None:
       continue
+    else:
+      # generate enrichment mask
+      E_Mask = np.zeros(size(Q), dtype=np.bool)
+      set_list = E.indices(varlist)
+      np.put(E_Mask, set_list, 1)
     
     for name, d in R.items():
       print name
