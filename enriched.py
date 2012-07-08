@@ -8,6 +8,7 @@ class Enriched(object):
     Args:
       pairs [*(str, str)] iterable of pairs of names.
     """
+    # TODO: implement pair set as adjancency list
     self.genes = set()
     self.pairs = []
     self.pairs_hash = set()
@@ -40,11 +41,14 @@ class Enriched(object):
     n = len(varlist)
     a = []
     cleaned_varlist = [clean(v) for v in varlist]
-    var_d = dict([(v, i) for i, v in cleaned_varlist])
-    for x, y in pairs:
+    var_d = dict([(v, i) for i, v in enumerate(cleaned_varlist)])
+    for x, y in self.pairs:
+      try:
         i, j = var_d[x], var_d[y]
-        idx = sym_idx(i,j,n)
-        a.append(idx)
+      except KeyError:
+        continue
+      idx = sym_idx(i,j,n)
+      a.append(idx)
     return a
 
 

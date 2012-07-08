@@ -2,6 +2,12 @@
 *~
 .#*
 #*
+*.qsub
+*.sh
+*.o*
+*.e*
+test/
+test_all/
 
 # Packages
 *.egg

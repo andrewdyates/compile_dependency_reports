@@ -1,5 +1,10 @@
 #!/usr/bin/python
-"""Given a set of dependency matrices for a microarray, generate a suite of analytics."""
+"""Given a set of dependency matrices for a microarray, generate a suite of analytics.
+
+SAMPLE USE:
+
+  python script.py json_input="gse2034.json" outdir="test" pina_file="/nfs/01/osu6683/PINA_gene_folder_enrichment/Homo-sapiens-20110628.txt"
+"""
 import json
 import numpy as np
 import numpy.ma as ma
@@ -8,6 +13,12 @@ from enriched import *
 from util import *
 import errno, os
 import sys
+import itertools
+from scipy.stats import mstats
+
+import matplotlib 
+matplotlib.use('agg') # required for use on OSC servers
+import matplotlib.pyplot as plt
 
 TOP_PLOTS = 500
 TOP_ENRICHMENTS = [1000, 10000, 100000, 500000]
@@ -20,13 +31,13 @@ def main(json_input=None, outdir=None, pina_file=None):
     os.makedirs(outdir)
   except OSError, e:
     if e.errno != errno.EEXIST: raise
+  print "Created output directory %s" % os.path.abspath(outdir)
 
   D = json.load(open(json_input))
   R = {} # results dictionary
 
   # create list of enrichment sets
-  # think of some more elegant way to do this?
-  enriched = {'None': None}
+  enriched = {'All': None}
   if pina_file:
     enriched['PINA'] = PINAEnriched(open(pina_file))
     print "Loaded %d pairs from %d variables from %s." % \
@@ -71,26 +82,73 @@ def main(json_input=None, outdir=None, pina_file=None):
   # for each enriched set (including no enrichment)
   for enrich_name, E in enriched.items():
 
-    # skip enrichment for now
     if E is not None:
-      continue
-    else:
-      # generate enrichment mask
-      E_Mask = np.zeros(size(Q), dtype=np.bool)
+      # Generate enrichment mask
+      E_Mask = np.zeros(np.size(Q), dtype=np.bool)
       set_list = E.indices(varlist)
-      np.put(E_Mask, set_list, 1)
+      np.put(E_Mask, set_list, True)
+    else:
+      E_Mask = None
+      # Mask by enrichment
     
-    for name, d in R.items():
-      print name
+    for dep_name, d in R.items():
+
+      M = d['Q']
+      if E_Mask is not None:
+        M = M[E_Mask] # cache this?
+        
+      print enrich_name, dep_name
       stats = {
-        'mean': d['Q'].mean(),
-        'std': d['Q'].std(),
-        'median': ma.median(d['Q']),
+        'size': ma.count(M), # is this correct given masked values?
+        'mean': M.mean(),
+        'std': M.std(),
+        'median': ma.median(M),
         }
       print stats
       d.update(stats)
 
-    #   generate histogram
+      # generate histograms
+      name_tuple = (enrich_name, dep_name, D['gse_id'])
+      print "Plotting histogram for %s..." % "_".join(name_tuple)
+      plt.clf(); plt.cla()
+      plt.title("%s %s %s" % name_tuple)
+      plt.hist(M.compressed(), bins=1000, histtype='step', normed=True)
+      plot_path = os.path.join(outdir, "hist"+"_".join(name_tuple)+".png")
+      print "Saving figure as %s..." % plot_path
+      plt.savefig(plot_path, dpi=600)
+      # log histogram
+      print "Plotting log histogram for %s..." % "_".join(name_tuple)
+      plt.clf(); plt.cla()
+      plt.title("Logscale %s %s %s" % name_tuple)
+      plt.hist(M.compressed(), bins=1000, histtype='step', normed=True, log=True)
+      plot_path = os.path.join(outdir, "loghist"+"_".join(name_tuple)+".png")
+      print "Saving figure as %s..." % plot_path
+      plt.savefig(plot_path, dpi=600)
+
+
+    # compute all-pairs 
+    for x, y in itertools.combinations(R.keys(), 2):
+
+      name_tuple = (x, y, enrich_name, D['gse_id'])
+      print "Scatter Plotting %s versus %s for %s from %s" % (name_tuple)
+      X_Q = R[x]['Q']
+      Y_Q = R[y]['Q']
+      if E_Mask is not None:
+        X_Q = X_Q[E_Mask]
+        Y_Q = Y_Q[E_Mask]
+        
+      pcc = mstats.pearsonr(X_Q, Y_Q)  
+      print "PCC of %s and %s:" % (x,y), pcc
+      
+      plt.clf(); plt.cla()
+      plt.title(" ".join(name_tuple))
+      plt.xlabel(x); plt.ylabel(y)
+      plot_path = os.path.join(outdir, "scatter"+"_".join(name_tuple)+".png")
+      plt.plot(X_Q, Y_Q, 'b.')
+      print "Saving figure as %s..." % plot_path
+      plt.savefig(plot_path, dpi=600)
+      
+
     #   if not no enrichment, compute enrichment
     #     output stats
     #     plot stats
@@ -107,6 +165,7 @@ def main(json_input=None, outdir=None, pina_file=None):
     # plot 
     
     # for all pairs of dependencies:
+    
       # compute pcc
       # compute dcor
       # compute spearman
