@@ -1,6 +1,7 @@
 {
     "gse_id": "GSE2034",
     "data_file": "/nfs/01/osu6683/gse2034/GSE2034.GPL96.eQTL.normed.tab",
+    "data_matrix": "/nfs/01/osu6683/gse2034/GSE2034.GPL96.eQTL.normed.tab.npy",
     "dependencies": {
 	"mic": {
 	       "dir": "/nfs/01/osu6683/gse2034/",
