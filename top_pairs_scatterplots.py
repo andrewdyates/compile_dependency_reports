@@ -24,10 +24,11 @@ def generate_top_k_scatters(M, D, A, varlist, dep_name, study_id, k=500, plot_di
     pp.title("%d %s %.3f" % (i, dep_name, score))
     pp.xlabel(x); pp.ylabel(y)
     pp.plot(M[xi], M[yi], 'b.')
-    filename = "%d_%s_%.3f_%s.png" % (i, dep_name, score, study_id)
+    filename = "%d_%s_%s_%s_%.3f_%s.png" % (i, x, y, dep_name, score, study_id)
+    print filename
+    filename = filename.replace('///','-').replace(' ', "_")
     pp.savefig(os.path.join(plot_dir, filename))
     fp_log.write("%s\t%s\t%d\t%.5f\n" % (x, y, i, score))
-    print filename
   fp_log.close()
 
 def main(jsonfile=None, k=500, outdir=""):
