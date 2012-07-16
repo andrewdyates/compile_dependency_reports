@@ -35,15 +35,24 @@ def generate_top_k_scatters(M, D, A, varlist, dep_name, study_id, k=500, plot_di
 def generate_top_k_named_scatters(M, D, A, varlist, dep_name, study_id, k=500, plot_dir=None, genelist=None):
   fp_log = open(os.path.join(plot_dir, "%s_%s_%d.log.txt" % (study_id, dep_name, k)), "w")
   i,rank = 0,0
-  geneset = set(getlist)
+  geneset = set(genelist)
+  n = len(varlist)
+  assert len(set(varlist) & geneset) == len(geneset)
   while i < k:
-    n = len(varlist)
-    idx = A[-i]
+    if rank % 1000000 == 0:
+      print "@ rank %d..." % rank
+    if rank >= n*(n-1)//2:
+      print "rank exhausted. Breaking..."
+      break
+    idx = A[-rank]
     score = D[idx]
     xi, yi = inv_sym_idx(idx, n)
     x, y = varlist[xi], varlist[yi]
+    if x in geneset or y in geneset:
+      print x,y
     rank += 1
-    if x not in geneset and y not in geneset: continue
+    if (x not in geneset) and (y not in geneset):
+      continue
     i += 1
     pp.clf(); pp.cla();
     pp.title("%d rank:%d %s %.3f" % (i, rank, dep_name, score))
