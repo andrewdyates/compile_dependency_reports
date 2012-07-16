@@ -5,7 +5,7 @@ EXAMPLE USE:
 
 python top_pairs_scatterplots.py jsonfile=$HOME/gse2034/gse2034_best.json k=500 outdir=$HOME/gse2034/top_scatters
 """
-from py_symmetric_matrix import *
+from py_symmetric_matrix.cpy import *
 from matplotlib import pyplot as pp
 import numpy as np
 import json
@@ -35,6 +35,7 @@ def generate_top_k_scatters(M, D, A, varlist, dep_name, study_id, k=500, plot_di
 def generate_top_k_named_scatters(M, D, A, varlist, dep_name, study_id, k=500, plot_dir=None, genelist=None):
   fp_log = open(os.path.join(plot_dir, "%s_%s_%d.log.txt" % (study_id, dep_name, k)), "w")
   i,rank = 0,0
+  geneset = set(getlist)
   while i < k:
     n = len(varlist)
     idx = A[-i]
@@ -42,7 +43,7 @@ def generate_top_k_named_scatters(M, D, A, varlist, dep_name, study_id, k=500, p
     xi, yi = inv_sym_idx(idx, n)
     x, y = varlist[xi], varlist[yi]
     rank += 1
-    if x not in genelist and y not in genelist: continue
+    if x not in geneset and y not in geneset: continue
     i += 1
     pp.clf(); pp.cla();
     pp.title("%d rank:%d %s %.3f" % (i, rank, dep_name, score))
@@ -81,6 +82,7 @@ def main(jsonfile=None, k=500, outdir="", genelist=None):
     if not genelist:
       generate_top_k_scatters(M, D, A, varlist, k=k, dep_name=dep_name, study_id=J['gse_id'], plot_dir=plot_dir)
     else:
+      print "Filtering for genes in %s..." % genelist
       generate_top_k_named_scatters(M, D, A, varlist, k=k, dep_name=dep_name, study_id=J['gse_id'], plot_dir=plot_dir, genelist=genelist)
     
 def make_dir(outdir):
