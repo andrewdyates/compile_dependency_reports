@@ -31,9 +31,38 @@ def generate_top_k_scatters(M, D, A, varlist, dep_name, study_id, k=500, plot_di
     fp_log.write("%s\t%s\t%d\t%.5f\n" % (x, y, i, score))
   fp_log.close()
 
-def main(jsonfile=None, k=500, outdir=""):
+
+def generate_top_k_named_scatters(M, D, A, varlist, dep_name, study_id, k=500, plot_dir=None, genelist=None):
+  fp_log = open(os.path.join(plot_dir, "%s_%s_%d.log.txt" % (study_id, dep_name, k)), "w")
+  i,rank = 0,0
+  while i < k:
+    n = len(varlist)
+    idx = A[-i]
+    score = D[idx]
+    xi, yi = inv_sym_idx(idx, n)
+    x, y = varlist[xi], varlist[yi]
+    rank += 1
+    if x not in genelist and y not in genelist: continue
+    i += 1
+    pp.clf(); pp.cla();
+    pp.title("%d rank:%d %s %.3f" % (i, rank, dep_name, score))
+    pp.xlabel(x); pp.ylabel(y)
+    pp.plot(M[xi], M[yi], 'b.')
+    filename = "%d_%d_%s_%s_%s_%.3f_%s.png" % (i, rank, x, y, dep_name, score, study_id)
+    print filename
+    filename = filename.replace('///','-').replace(' ', "_")
+    pp.savefig(os.path.join(plot_dir, filename))
+    fp_log.write("%s\t%s\t%d\t%.5f\n" % (x, y, i, score))
+  fp_log.close()
+
+
+def main(jsonfile=None, k=500, outdir="", genelist=None):
   k = int(k)
   J = json.load(open(jsonfile))
+  if genelist is not None:
+    if type(genelist) == str:
+      genelist = genelist.split(',')
+      
   M = np.ma.load(J["data_matrix"])
   varlist = [s.partition('\t')[0] for s in open(J["data_file"]) if s[0] not in ['#', '\n']]
   assert len(varlist) == J['n_vars'], "%d != %d" % (len(varlist), J['n_vars'])
@@ -49,7 +78,10 @@ def main(jsonfile=None, k=500, outdir=""):
       print "no argsorted file. Sorting %s..." % d["values_file"]
       A = D.argsort()
       assert np.size(A) == J["n_pairs"]
-    generate_top_k_scatters(M, D, A, varlist, k=k, dep_name=dep_name, study_id=J['gse_id'], plot_dir=plot_dir)
+    if not genelist:
+      generate_top_k_scatters(M, D, A, varlist, k=k, dep_name=dep_name, study_id=J['gse_id'], plot_dir=plot_dir)
+    else:
+      generate_top_k_named_scatters(M, D, A, varlist, k=k, dep_name=dep_name, study_id=J['gse_id'], plot_dir=plot_dir, genelist=genelist)
     
 def make_dir(outdir):
   try:
