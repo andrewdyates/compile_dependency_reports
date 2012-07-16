@@ -24,7 +24,7 @@ TOP_PLOTS = 500
 TOP_ENRICHMENTS = [1000, 10000, 100000, 500000]
 
 
-def main(json_input=None, outdir=None, pina_file=None):
+def main(json_input=None, outdir=None, pina_file=None, only_pina=False):
   assert (json_input and outdir is not None)
 
   try:
@@ -88,6 +88,8 @@ def main(json_input=None, outdir=None, pina_file=None):
       set_list = E.indices(varlist)
       np.put(E_Mask, set_list, True)
     else:
+      if only_pina:
+        continue
       E_Mask = None
       # Mask by enrichment
     
