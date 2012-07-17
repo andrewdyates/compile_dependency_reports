@@ -27,6 +27,8 @@ def generate_top_k_scatters(M, D, A, varlist, dep_name, study_id, k=500, plot_di
     filename = "%d_%s_%s_%s_%.3f_%s.png" % (i, x, y, dep_name, score, study_id)
     print filename
     filename = filename.replace('///','-').replace(' ', "_")
+    if len(filename) > 100:
+      filename = filename[:100] + ".png"
     pp.savefig(os.path.join(plot_dir, filename))
     fp_log.write("%s\t%s\t%d\t%.5f\n" % (x, y, i, score))
   fp_log.close()
@@ -61,6 +63,8 @@ def generate_top_k_named_scatters(M, D, A, varlist, dep_name, study_id, k=500, p
     filename = "%d_%d_%s_%s_%s_%.3f_%s.png" % (i, rank, x, y, dep_name, score, study_id)
     print filename
     filename = filename.replace('///','-').replace(' ', "_")
+    if len(filename) > 100:
+      filename = filename[:100] + ".png"
     pp.savefig(os.path.join(plot_dir, filename))
     fp_log.write("%s\t%s\t%d\t%.5f\n" % (x, y, i, score))
   fp_log.close()
